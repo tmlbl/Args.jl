@@ -9,33 +9,31 @@ facts("Utils") do
     @fact Args.sig("plop [dop]").args --> Arguments(["dop"])
   end
   context("Parse flag signature") do
-
+    @fact Args.sig("-p").names --> Arguments(["-p"])
+    @fact Args.sig("-p --pong").names --> Arguments(["-p", "--pong"])
+    @fact Args.sig("--pong [ping]").args --> Arguments(["ping"])
   end
 end
 
-# facts("Command") do
-#   plop = Command("plop [area]", """
-# Plop command: plot a Dollop on your top
-#   """) do args
-#     @show args
-#   end
-#
-#   @fact Args.parse(plop, Arguments(["exec", "plop", "dome"])) --> Arguments(["dome"])
-#   @fact Args.parse(plop, Arguments(["exec", "plot"])) --> nothing
-#   @fact_throws Args.parse(plop, Arguments(["exec", "plop"]))
-#
-# end
-#
-# facts("Flag") do
-#   flg = Flag("-p, --peanuts [type]", """
-# The circus must be in town!
-#   """) do args
-#     @show args
-#   end
-#
-#   @fact Args.parse(flg, Arguments(["exec", "--peanuts", "bag"])) --> Arguments(["bag"])
-#   @fact_throws Args.parse(flg, Arguments(["exec", "-p"]))
-#   @fact Args.parse(flg, Arguments(["exec", "-p", "shells"])) --> Arguments(["shells"])
-#   @fact Args.parse(flg, Arguments(["exec"])) --> false
-#   @fact_throws Args.parse(flg, Arguments(["exec", "--peanuts"]))
-# end
+facts("Command") do
+  state = [0]
+
+  plop = Command("plop [area]", """
+Plop command: plot a Dollop on your top
+  """) do args
+    state[1] = 1
+  end
+  context("Parses arguments") do
+    @fact Args.parse(plop, Arguments(["exec", "plop", "dome"])) --> Dict("area" => "dome")
+    # @fact Args.parse(plop, Arguments(["exec", "plot"])) --> nothing
+    # @fact_throws Args.parse(plop, Arguments(["exec", "plop"]))
+    # Args.exec(plop, Arguments(["exec", "plop", "gyro"]))
+
+  end
+
+  flag = Command("-n --no [scrubs]", """
+Pay my bills
+  """) do args
+    @show args
+  end
+end

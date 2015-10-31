@@ -22,21 +22,6 @@ indexin(args::Arguments, arg::AbstractString) = begin
   ix
 end
 
-type Command
-  action::Function
-  names::Arguments
-  help::AbstractString
-  arguments::Int64
-end
-
-type Flag
-  action::Function
-  short::Char
-  long::UTF8String
-  help::AbstractString
-  arguments::Int64
-end
-
 type Signature
   names::Arguments
   args::Arguments
@@ -55,47 +40,41 @@ function sig(str::AbstractString)
   else
     name = str
   end
-  sign.names = Arguments(map((s) -> strip(utf8(s)), split(name, ',')))
+  sign.names = Arguments(filter((x) -> x != "", map((s) ->
+      strip(utf8(s)), split(name, ' '))))
   sign
 end
 
-function sig(c::Command)
-
+type Command
+  action::Function
+  names::Arguments
+  help::AbstractString
+  arguments::Arguments
 end
 
-function sig(f::Flag)
-
-end
-
-function help(c::Command)
-
-end
-
-function help(f::Flag)
-
-end
-
-function parse(args::Arguments)
-
+Command(action, signature, help) = begin
+  s = sig(signature)
+  Command(action, s.names, help, s.args)
 end
 
 function parse(c::Command, args::Arguments)
   nargs = Arguments()
-  for (i, a) in enumerate(args)
-    if c.name == a
-      if c.arguments > 0
-        for ix = (i + 1):(i + c.arguments)
-          if length(args) < ix
-            print_with_color(:red, c.help)
-            error("Command $(c.long) takes $(c.arguments) argument$(c.arguments > 1 ? s : ' ')")
-          else
-            push!(nargs, args[ix])
-          end
+  res = Dict{UTF8String,Any}()
+  for n in c.names
+    for (ix, a) in enumerate(args)
+      if n == a
+        for (ai, arg) in enumerate(c.arguments)
+          res[arg] = args[ix + ai]
         end
       end
-      return nargs
     end
   end
+  res
+end
+
+function exec(c::Command, args::Arguments)
+  p = parse(c, args)
+  c.action(p)
 end
 
 end # module
