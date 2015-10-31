@@ -59,12 +59,12 @@ end
 
 function parse(c::Command, args::Arguments)
   nargs = Arguments()
-  res = Dict{UTF8String,Any}()
+  res = Dict{Symbol,Any}()
   for n in c.names
     for (ix, a) in enumerate(args)
       if n == a
         for (ai, arg) in enumerate(c.arguments)
-          res[arg] = args[ix + ai]
+          res[symbol(arg)] = args[ix + ai]
         end
       end
     end

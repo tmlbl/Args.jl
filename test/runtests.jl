@@ -24,16 +24,16 @@ Plop command: plot a Dollop on your top
     state[1] = 1
   end
   context("Parses arguments") do
-    @fact Args.parse(plop, Arguments(["exec", "plop", "dome"])) --> Dict("area" => "dome")
-    # @fact Args.parse(plop, Arguments(["exec", "plot"])) --> nothing
-    # @fact_throws Args.parse(plop, Arguments(["exec", "plop"]))
-    # Args.exec(plop, Arguments(["exec", "plop", "gyro"]))
-
+    @fact Args.parse(plop, Arguments(["exec", "plop", "dome"])) --> Dict(:area => "dome")
+    @fact Args.parse(plop, Arguments(["exec", "plot"])) --> Dict()
+    @fact_throws Args.parse(plop, Arguments(["exec", "plop"]))
+    Args.exec(plop, Arguments(["exec", "plop", "gyro"]))
+    @fact state[1] --> 1
   end
 
   flag = Command("-n --no [scrubs]", """
 Pay my bills
   """) do args
-    @show args
+    state[1] = 2
   end
 end
