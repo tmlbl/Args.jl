@@ -23,9 +23,9 @@ Plop command: plot a Dollop on your top
   """) do args
     state[1] = 1
   end
-  context("Parses arguments") do
+  context("Command arguments") do
     @fact Args.parse(plop, Arguments(["exec", "plop", "dome"])) --> Dict(:area => "dome")
-    @fact Args.parse(plop, Arguments(["exec", "plot"])) --> Dict()
+    @fact Args.parse(plop, Arguments(["exec", "plot"])) --> nothing
     @fact_throws Args.parse(plop, Arguments(["exec", "plop"]))
     Args.exec(plop, Arguments(["exec", "plop", "gyro"]))
     @fact state[1] --> 1
@@ -35,5 +35,8 @@ Plop command: plot a Dollop on your top
 Pay my bills
   """) do args
     state[1] = 2
+  end
+  context("Flag arguments") do
+    @fact Args.parse(flag, Arguments(["exec", "-n", "rayray"])) --> Dict(:scrubs => "rayray")
   end
 end

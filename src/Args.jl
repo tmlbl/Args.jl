@@ -5,7 +5,8 @@ module Args
 export Command,
        Flag,
        Arguments,
-       indexin
+       indexin,
+       exec
 
 typealias Arguments Array{UTF8String,1}
 
@@ -60,21 +61,31 @@ end
 function parse(c::Command, args::Arguments)
   nargs = Arguments()
   res = Dict{Symbol,Any}()
+  found = false
   for n in c.names
     for (ix, a) in enumerate(args)
       if n == a
+        found = true
         for (ai, arg) in enumerate(c.arguments)
           res[symbol(arg)] = args[ix + ai]
         end
       end
     end
   end
-  res
+  found ? res : nothing
 end
 
 function exec(c::Command, args::Arguments)
   p = parse(c, args)
-  c.action(p)
+  if p != nothing
+    c.action(p)
+  end
+end
+
+function exec(cmds::Array{Command,1}, args::Arguments)
+  for c in cmds
+    exec(c, args)
+  end
 end
 
 end # module
