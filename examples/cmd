@@ -1,0 +1,14 @@
+#!/usr/bin/env julia
+
+using Args
+
+exec([
+  Command("run [this]", """
+Run this command
+  """) do args
+    @show args
+  end,
+  Flag("-n [rock] [sock]", """
+Coco and the girls
+  """)
+], ARGS)

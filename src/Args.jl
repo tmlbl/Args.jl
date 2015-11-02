@@ -46,19 +46,34 @@ function sig(str::AbstractString)
   sign
 end
 
-type Command
+abstract ArgElement
+
+type Command <: ArgElement
   action::Function
   names::Arguments
   help::AbstractString
   arguments::Arguments
 end
 
+type Flag <: ArgElement
+  names::Arguments
+  help::AbstractString
+  arguments::Arguments
+end
+
+typealias ArgTable Array{ArgElement,1}
+
 Command(action, signature, help) = begin
   s = sig(signature)
   Command(action, s.names, help, s.args)
 end
 
-function parse(c::Command, args::Arguments)
+Flag(signature, help) = begin
+  s = sig(signature)
+  Flag(s.names, help, s.args)
+end
+
+function parse(c::ArgElement, args::Arguments)
   nargs = Arguments()
   res = Dict{Symbol,Any}()
   found = false
@@ -79,7 +94,17 @@ function parse(c::Command, args::Arguments)
   found ? res : nothing
 end
 
-function exec(c::Command, args::Arguments)
+function parse(c::ArgElement, args::Arguments, res::Dict{Symbol,Any})
+  p = parse(c, args)
+  if typeof(c) == Flag
+    for (k, v) in p
+      res[k] = v
+    end
+  end
+  res
+end
+
+function exec(c::ArgElement, args::Arguments)
   p = parse(c, args)
   if p != nothing
     if length(c.arguments) > 0
@@ -90,9 +115,20 @@ function exec(c::Command, args::Arguments)
   end
 end
 
-function exec(cmds::Array{Command,1}, args::Arguments)
+function exec(cmds::AbstractArray, args::Arguments)
+  res = Dict{Symbol,Any}()
+  exec_cmd = () -> nothing
   for c in cmds
-    exec(c, args)
+    parse(c, args, res)
+    p = parse(c, args)
+    if p != nothing && typeof(c) == Command
+      exec_cmd = c
+    end
+  end
+  if exec_cmd != nothing && length(exec_cmd.arguments) > 0
+    exec_cmd.action(res)
+  else
+    exec_cmd.action()
   end
 end
 

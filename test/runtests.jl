@@ -25,7 +25,6 @@ Plop command: plot a Dollop on your top
   end
   context("Command with argument") do
     @fact Args.parse(plop, Arguments(["exec", "plop", "dome"])) --> Dict(:area => "dome")
-    @fact_throws Args.parse(plop, Arguments(["exec", "plot"]))
     @fact_throws Args.parse(plop, Arguments(["exec", "plop"]))
     Args.exec(plop, Arguments(["exec", "plop", "gyro"]))
     @fact state[1] --> 1
@@ -41,13 +40,13 @@ Do something
     @fact state[1] --> 3
   end
 
-  flag = Command("-n --no [scrubs]", """
-Pay my bills
-  """) do args
-    state[1] = 2
-  end
+  flag = Flag("-n --no [scrubs]", "Pay my bills")
   context("Flag with argument") do
-    @fact Args.parse(flag, Arguments(["exec", "-n", "rayray"])) --> Dict(:scrubs => "rayray")
+    @fact Args.parse(flag, Arguments(["exec", "dune", "-n", "rayray"])) --> Dict(:scrubs => "rayray")
     @fact_throws Args.parse(flag, Arguments(["exec", "-n"]))
+  end
+
+  context("Combination flag and command") do
+
   end
 end
