@@ -72,13 +72,19 @@ function parse(c::Command, args::Arguments)
       end
     end
   end
+  arglen = length(c.arguments)
+  if length(res) < arglen
+    error("'$(c.names[1])' takes $(length(c.arguments)) argument$(arglen != 1 ? 's' : "")")
+  end
   found ? res : nothing
 end
 
 function exec(c::Command, args::Arguments)
   p = parse(c, args)
-  if p != nothing
+  if length(c.arguments) > 0
     c.action(p)
+  else
+    c.action()
   end
 end
 
